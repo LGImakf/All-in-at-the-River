@@ -1,0 +1,41 @@
+LL dfs(int x, int lim) {
+  if (x == T || !lim) return lim;
+  vis[x] = true; int f = 0, flow = 0;
+  for (int i = cur[x], d; i && lim; i = e[i].nxt) {
+    cur[x] = i; d = e[i].v; if (d == S) continue;
+    if (!vis[d] && dis[d] == dis[x] + e[i].w + h[x] - h[e[i].v] 
+    && (f = dfs(d, std::min(lim, e[i].f)))) {
+      e[i].f -= f; e[i ^ 1].f += f;
+      flow += f; lim -= f;
+  } }
+  return flow;
+}
+ 
+std::pair<LL, LL> solve() { // return <flow, cost>
+  LL res = 0, flow = 0; int first = true;
+  for (int i = 0; i <= T; ++i) h[i] = 0;
+  while (true) {
+    std::priority_queue<pii, std::vector<pii>,
+    std::greater<pii>> q;
+    for (int i = 0; i <= T; ++i) {
+      dis[i] = INF; cur[i] = head[i]; vis[i] = 0; }
+    dis[S] = 0;
+    if (first) { // Run SPFA or topo sort
+      // Here
+      first = false;
+    } else { q.push(pii(0, S));
+      while (!q.empty()) {
+        pii now = q.top(); q.pop(); int x = now.second;
+        if (dis[x] < now.first) continue;
+        for (int o = head[x]; o; o = e[o].nxt) {
+          LL w = dis[x] + e[o].w + h[x] - h[e[o].v];
+          if (e[o].f > 0 && dis[e[o].v] > w) {
+            dis[e[o].v] = w; q.push(pii(w, e[o].v));
+    } } } }
+    if (dis[T] == INF) break;
+    int fl = dfs(S, 1e9);
+    for (int i = 0; i <= T; ++i) h[i] += dis[i];
+    res += (1LL) * fl * h[T]; flow += fl;
+  }
+  return std::make_pair(flow, res);
+}
